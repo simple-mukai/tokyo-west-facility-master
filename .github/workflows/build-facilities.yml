@@ -1,0 +1,129 @@
+name: Build facility master
+
+# Stage A: manual runs only. A schedule will be added in phase 1b.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true = do not commit (outputs are kept as an artifact only)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-facilities
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install osmium-tool
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq osmium-tool
+          OSMIUM_VERSION="$(osmium --version | head -n 1)"
+          echo "OSMIUM_VERSION=${OSMIUM_VERSION}" >> "$GITHUB_ENV"
+          echo "${OSMIUM_VERSION}"
+          python3 --version
+
+      - name: Prepare work directory
+        run: |
+          WORK="${RUNNER_TEMP}/work"
+          mkdir -p "${WORK}/out"
+          echo "WORK=${WORK}" >> "$GITHUB_ENV"
+          echo "BBOX=$(python3 scripts/build_facilities.py bbox-arg --area config/area.json)" >> "$GITHUB_ENV"
+
+      - name: Download Kanto PBF and verify MD5
+        run: |
+          read -r PBF_URL MD5_URL PBF_NAME < <(python3 -c 'import json;s=json.load(open("config/area.json",encoding="utf-8"))["source"];print(s["pbfUrl"],s["md5Url"],s["pbfFileName"])')
+          UA="tokyo-west-facility-master (GitHub Actions; ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY})"
+          cd "${WORK}"
+          ok=0
+          for attempt in 1 2; do
+            echo "Download attempt ${attempt}"
+            curl -fsSL --retry 3 --retry-delay 10 -A "${UA}" -o source.md5 "${MD5_URL}"
+            curl -fsSL --retry 3 --retry-delay 10 -A "${UA}" -o "${PBF_NAME}" "${PBF_URL}"
+            expected="$(awk '{print $1; exit}' source.md5)"
+            actual="$(md5sum "${PBF_NAME}" | awk '{print $1}')"
+            echo "expected=${expected} actual=${actual}"
+            if [ -n "${expected}" ] && [ "${expected}" = "${actual}" ]; then ok=1; break; fi
+            echo "MD5 mismatch (the file may have been replaced during download). Retrying in 60s."
+            sleep 60
+          done
+          if [ "${ok}" != "1" ]; then echo "::error::MD5 verification failed"; exit 1; fi
+          ls -l "${PBF_NAME}"
+          echo "PBF=${WORK}/${PBF_NAME}" >> "$GITHUB_ENV"
+          echo "SOURCE_MD5=${actual}" >> "$GITHUB_ENV"
+
+      - name: Read source timestamp
+        run: |
+          TS="$(osmium fileinfo -g header.option.osmosis_replication_timestamp "${PBF}" || true)"
+          if [ -z "${TS}" ]; then echo "::warning::osmosis_replication_timestamp not found in PBF header"; fi
+          echo "SOURCE_TIMESTAMP=${TS}" >> "$GITHUB_ENV"
+          echo "source timestamp: ${TS}"
+
+      - name: Ward boundary check
+        run: |
+          python3 scripts/build_facilities.py ward-filter --area config/area.json --out "${WORK}/ward-filter.txt"
+          cat "${WORK}/ward-filter.txt"
+          osmium tags-filter -e "${WORK}/ward-filter.txt" -t -O -o "${WORK}/wards.osm.pbf" "${PBF}"
+          osmium export -c config/export-config.json -f geojsonseq -O -o "${WORK}/wards.geojsonseq" "${WORK}/wards.osm.pbf"
+          python3 scripts/build_facilities.py ward-check --area config/area.json \
+            --geojsonseq "${WORK}/wards.geojsonseq" --out "${WORK}/ward_check.json"
+
+      - name: Extract bbox and filter tags
+        run: |
+          echo "bbox: ${BBOX}"
+          osmium extract -b "${BBOX}" -s smart -O -o "${WORK}/area.osm.pbf" "${PBF}"
+          osmium tags-filter -e config/filters.txt -t -O -o "${WORK}/poi.osm.pbf" "${WORK}/area.osm.pbf"
+          osmium export -c config/export-config.json -f geojsonseq -O -o "${WORK}/poi.geojsonseq" "${WORK}/poi.osm.pbf"
+          ls -l "${WORK}"
+
+      - name: Build facilities.json and manifest.json
+        run: |
+          python3 scripts/build_facilities.py build --area config/area.json \
+            --geojsonseq "${WORK}/poi.geojsonseq" \
+            --ward-check "${WORK}/ward_check.json" \
+            --out-dir "${WORK}/out" \
+            --source-timestamp "${SOURCE_TIMESTAMP}" \
+            --source-md5 "${SOURCE_MD5}" \
+            --osmium-version "${OSMIUM_VERSION}" \
+            --dry-run "${{ inputs.dry_run }}"
+
+      - name: Upload outputs as artifact
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: facility-output
+          path: |
+            ${{ runner.temp }}/work/out/
+            ${{ runner.temp }}/work/ward_check.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Commit data (only when dry_run is false)
+        if: ${{ !inputs.dry_run }}
+        run: |
+          mkdir -p data
+          cp "${WORK}/out/facilities.json" data/facilities.json
+          cp "${WORK}/out/manifest.json" data/manifest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/facilities.json data/manifest.json
+          if git diff --cached --quiet; then
+            echo "No changes in data/ (変更なし). Nothing to commit."
+            exit 0
+          fi
+          git commit -m "Update facility master (source ${SOURCE_TIMESTAMP:-unknown})"
+          git push
