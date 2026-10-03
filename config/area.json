@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "bboxStatus": "candidate",
+  "candidateBbox": {
+    "west": 139.54,
+    "south": 35.57,
+    "east": 139.78,
+    "north": 35.76
+  },
+  "radiusM": 1800,
+  "wards": ["杉並区", "中野区", "新宿区", "渋谷区", "目黒区"],
+  "wardPreferredAdminLevel": "7",
+  "source": {
+    "pbfUrl": "https://download.geofabrik.de/asia/japan/kanto-latest.osm.pbf",
+    "md5Url": "https://download.geofabrik.de/asia/japan/kanto-latest.osm.pbf.md5",
+    "pbfFileName": "kanto-latest.osm.pbf"
+  },
+  "checks": {
+    "minTotal": 1000,
+    "minPerCategory": 1,
+    "maxDataBytes": 20000000
+  }
+}
