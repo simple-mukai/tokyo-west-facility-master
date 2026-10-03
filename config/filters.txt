@@ -1,0 +1,5 @@
+# osmium tags-filter expressions (one per line, "#" starts a comment)
+# Same 7 conditions as the current Overpass query. Most frequent first.
+nwr/highway=bus_stop
+nwr/shop=supermarket,convenience
+nwr/amenity=hospital,pharmacy,kindergarten,childcare,school
