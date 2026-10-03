@@ -37,9 +37,9 @@ GitHub Actions が Geofabrik 配布の関東地方 OSM データ（`.osm.pbf`）
 
 ## 対象範囲
 
-`config/area.json` の `candidateBbox`（西 139.54 / 南 35.57 / 東 139.78 / 北 35.76）を **候補値** として使用しています。
+`config/area.json` の `candidateBbox`（西 139.54 / 南 35.57 / 東 139.78 / 北 35.76）を正式採用しています（`bboxStatus: "adopted"`）。
 
-ワークフロー内の区境界チェック（wardCheck）で、OSM の行政区境界から杉並区・中野区・新宿区・渋谷区・目黒区の実際の範囲を算出し、候補範囲を半径 1,800m 分内側に縮めた範囲に収まるかを検証します。検証に通らない場合はデータを出力しません。範囲の正式採用は、実データでの wardCheck 結果を確認した後に行います（`area.json` の `bboxStatus`）。
+初回実データ dry run（GitHub Actions Run #1、元データ時刻 2026-10-02T20:21:34Z）の wardCheck で、OSM の行政区境界から杉並区・中野区・新宿区・渋谷区・目黒区を確認し、全区が admin_level=7 かつ半径1,800m分内側に縮めた有効範囲内に収まることを確認しました。最小の残余マージンは北側の約0.903kmです。今後もワークフロー実行時に同じ wardCheck を行い、検証に通らない場合はデータを出力しません。
 
 ## Overpass API との既知の違い
 
