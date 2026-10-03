@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-03T09:25:27Z",
+  "dryRun": false,
+  "bboxStatus": "adopted",
+  "source": {
+    "url": "https://download.geofabrik.de/asia/japan/kanto-latest.osm.pbf",
+    "md5": "088f95ceaae60c29c29886e668be55cd",
+    "timestamp": "2026-10-02T20:21:34Z"
+  },
+  "bbox": {
+    "west": 139.54,
+    "south": 35.57,
+    "east": 139.78,
+    "north": 35.76
+  },
+  "validArea": {
+    "west": 139.559926,
+    "south": 35.586279,
+    "east": 139.760074,
+    "north": 35.743721
+  },
+  "radiusM": 1800,
+  "tagConditions": [
+    "shop=supermarket",
+    "shop=convenience",
+    "amenity=hospital",
+    "amenity=pharmacy",
+    "amenity=kindergarten|childcare",
+    "amenity=school",
+    "highway=bus_stop"
+  ],
+  "categoryOrder": [
+    "supermarket",
+    "convenience",
+    "hospital",
+    "pharmacy",
+    "kindergarten",
+    "school",
+    "bus_stop"
+  ],
+  "counts": {
+    "total": 18245,
+    "byCategory": {
+      "supermarket": 1438,
+      "convenience": 3952,
+      "hospital": 328,
+      "pharmacy": 1993,
+      "kindergarten": 1767,
+      "school": 1496,
+      "bus_stop": 7271
+    },
+    "byType": {
+      "node": 16315,
+      "way": 1897,
+      "relation": 33
+    }
+  },
+  "buildStats": {
+    "features": 18268,
+    "skippedNoTypeId": 0,
+    "skippedNoMatch": 0,
+    "skippedNoGeometry": 0,
+    "skippedOutsideBbox": 23,
+    "duplicates": 0
+  },
+  "wardCheck": {
+    "passed": true,
+    "wardUnionBbox": {
+      "west": 139.585088,
+      "south": 35.600571,
+      "east": 139.745139,
+      "north": 35.735557
+    },
+    "marginsKm": {
+      "west": {
+        "marginKm": 4.073,
+        "afterRadiusKm": 2.273
+      },
+      "east": {
+        "marginKm": 3.149,
+        "afterRadiusKm": 1.349
+      },
+      "south": {
+        "marginKm": 3.38,
+        "afterRadiusKm": 1.58
+      },
+      "north": {
+        "marginKm": 2.703,
+        "afterRadiusKm": 0.903
+      }
+    },
+    "wards": [
+      {
+        "name": "杉並区",
+        "found": true,
+        "relationId": "1543055",
+        "adminLevel": "7",
+        "bbox": {
+          "west": 139.585088,
+          "south": 35.665883,
+          "east": 139.667799,
+          "north": 35.731427
+        },
+        "insideValidArea": true
+      },
+      {
+        "name": "中野区",
+        "found": true,
+        "relationId": "1543056",
+        "adminLevel": "7",
+        "bbox": {
+          "west": 139.624272,
+          "south": 35.676561,
+          "east": 139.694286,
+          "north": 35.735557
+        },
+        "insideValidArea": true
+      },
+      {
+        "name": "新宿区",
+        "found": true,
+        "relationId": "1758858",
+        "adminLevel": "7",
+        "bbox": {
+          "west": 139.673275,
+          "south": 35.673221,
+          "east": 139.745139,
+          "north": 35.729904
+        },
+        "insideValidArea": true
+      },
+      {
+        "name": "渋谷区",
+        "found": true,
+        "relationId": "1759477",
+        "adminLevel": "7",
+        "bbox": {
+          "west": 139.661378,
+          "south": 35.641485,
+          "east": 139.723926,
+          "north": 35.692157
+        },
+        "insideValidArea": true
+      },
+      {
+        "name": "目黒区",
+        "found": true,
+        "relationId": "1758936",
+        "adminLevel": "7",
+        "bbox": {
+          "west": 139.661608,
+          "south": 35.600571,
+          "east": 139.71777,
+          "north": 35.664139
+        },
+        "insideValidArea": true
+      }
+    ]
+  },
+  "dataFile": "facilities.json",
+  "dataBytes": 3009091,
+  "sha256": "b1e72891cb6c9d2a7357fba755f7e808cfaa48df04e2f056763ae3c308c6baa8",
+  "attribution": "© OpenStreetMap contributors",
+  "copyrightUrl": "https://www.openstreetmap.org/copyright",
+  "license": "ODbL-1.0",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "osmiumVersion": "osmium version 1.16.0",
+  "runUrl": "https://github.com/simple-mukai/tokyo-west-facility-master/actions/runs/37112921400",
+  "validationErrors": []
+}
