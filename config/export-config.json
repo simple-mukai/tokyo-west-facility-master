@@ -1,0 +1,11 @@
+{
+  "attributes": {
+    "type": true,
+    "id": true
+  },
+  "format_options": {
+    "print_record_separator": false
+  },
+  "linear_tags": false,
+  "area_tags": true
+}
